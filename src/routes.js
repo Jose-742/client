@@ -2,7 +2,8 @@ import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 import Login from './pages/Login'
-import Book from './pages/Book'
+import Books from './pages/Books'
+import NewBook from './pages/NewBook'
 
 
 export default function AppRoutes() {
@@ -10,7 +11,8 @@ export default function AppRoutes() {
         <BrowserRouter>
             <Routes>
                 <Route path="/" exact element={<Login />} />
-                <Route path="/book" element={<Book />} />
+                <Route path="/books" element={<Books />} />
+                <Route path="/book/new" element={<NewBook />} />
             </Routes>
         </BrowserRouter>
     );
