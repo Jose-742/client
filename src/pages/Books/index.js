@@ -17,6 +17,7 @@ export default function Books(){
 
     const navigate = useNavigate();
 
+    // Função para deslogar 
     async function logout(){
         localStorage.clear();
         navigate('/')
@@ -40,6 +41,16 @@ export default function Books(){
             console.error('Error fetching books:', err);
         }
     }, [accessToken]);
+
+     // Função para editar um livro
+    async function editBook(id){
+        try{
+            navigate(`/book/new/${id}`)
+            await loadBooks(); 
+        } catch (err) {
+            alert('Edit failed! Try again.')
+        }
+    }
     
     // Função para deletar um livro
     async function deleteBook(id){
@@ -49,8 +60,6 @@ export default function Books(){
                     Authorization: `Bearer ${accessToken}`
                 }
             })
-
-            //setBooks(books.filter(book => book.id !== id))
             await loadBooks(); 
         } catch (err) {
             alert('Delete failed! Try again.')
@@ -67,7 +76,7 @@ export default function Books(){
             <header>
                 <img src={logoImage} alt="Logo" />
                 <span>Welcome, <strong>{username.toUpperCase()}</strong>!</span>
-                <Link className='button' to="/book/new">Add New Book</Link>
+                <Link className='button' to="/book/new/0">Add New Book</Link>
                 <button onClick={logout} type='button'>
                     <FiPower size={18} color='#251FC5'/>
                 </button>
@@ -86,7 +95,7 @@ export default function Books(){
                         <strong>Release Date:</strong>
                         <p>{Intl.DateTimeFormat('pt-BR').format(new Date(book.launchDate))}</p>
                         
-                        <button type='button'>
+                        <button onClick={() => editBook(book.id)} type='button'>
                             <FiEdit size={20} color='#251FC5'/>
                         </button>
 
