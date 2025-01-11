@@ -94,3 +94,9 @@
     line-height: 21px;
     font-size: 16px;
 }
+
+.tag-msg {
+    margin-top: 8px;
+    text-align: center;
+    color: #737380;
+}

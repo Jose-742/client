@@ -11,6 +11,8 @@ import logoImage from '../../assets/logo.svg'
 export default function Books(){
     
     const [books, setBooks] = useState([]);
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
 
     const username = localStorage.getItem('username');
     const accessToken = localStorage.getItem('accessToken');
@@ -23,30 +25,40 @@ export default function Books(){
         navigate('/')
     }
 
-     // Função para carregar os livros (memoizada)
-    const loadBooks = useCallback(async () => {
+    // Função para carregar mais livros
+    const fetchMoreBooks = useCallback(async () => {
+        if (!hasMore) return;
+
         try {
             const response = await api.get('api/book/v1', {
                 headers: {
                     Authorization: `Bearer ${accessToken}`
                 },
                 params: {
-                    page: 1,
-                    size: 4,
+                    page: page,
+                    size: 2,
                     direction: 'asc'
                 }
             });
-            setBooks(response.data._embedded.bookVOList);
+            const newBooks = response.data?._embedded?.bookVOList || [];
+            
+            // Atualiza o estado dos livros e verifica se há mais itens
+            setBooks(prevBooks => [...prevBooks, ...newBooks]);
+            setHasMore(newBooks.length > 0); // Se não há novos itens, marca como fim
         } catch (err) {
             console.error('Error fetching books:', err);
         }
-    }, [accessToken]);
+    }, [accessToken, page, hasMore]);
+
+    // Carrega os livros ao montar o componente
+    useEffect(() => {
+        fetchMoreBooks();
+    }, [fetchMoreBooks]);
 
      // Função para editar um livro
     async function editBook(id){
         try{
             navigate(`/book/new/${id}`)
-            await loadBooks(); 
         } catch (err) {
             alert('Edit failed! Try again.')
         }
@@ -60,16 +72,17 @@ export default function Books(){
                     Authorization: `Bearer ${accessToken}`
                 }
             })
-            await loadBooks(); 
+            // Atualiza a lista de livros após a exclusão
+            setBooks(prevBooks => prevBooks.filter(book => book.id !== id));
         } catch (err) {
             alert('Delete failed! Try again.')
         }
     }
 
-    // Carrega os livros ao montar o componente
-    useEffect(() => {
-        loadBooks();
-    }, [loadBooks]);
+    // Função para carregar mais livros ao clicar em "Load More"
+    const loadMore = () => {
+        setPage(prevPage => prevPage + 1);
+    };
     
     return (
         <div className="book-container">
@@ -105,6 +118,12 @@ export default function Books(){
                     </li>
                 ))}
             </ul>
+
+            {hasMore ? (
+                <button className='button' type='button' onClick={loadMore}>Load More</button>
+            ) : (
+                <p className='tag-msg'>No more books to load.</p>
+            )}
         </div>
 
     );
